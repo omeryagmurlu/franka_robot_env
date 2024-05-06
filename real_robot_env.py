@@ -138,15 +138,7 @@ class RealRobotEnv(gym.Env):
         if self.use_delta_robot:
             robot_action = self.robot.get_sensors()['joint_pos'].numpy() + robot_action
             
-        if self.velocity_limits:
-            q_des_unclipped = robot_action
-            q_desired, clip_ttg_multiplier = self.robot.clip_velocity_limits(q_des_unclipped)
-            if not np.allclose(q_des_unclipped, q_desired):
-                print("WARNING: Clipping velocity limits, desired norm: %s, clipped norm: %s"%(np.linalg.norm(q_des_unclipped), np.linalg.norm(q_desired)))
-            # clip_ttg_multiplier = np.ceil(clip_ttg_multiplier)
-        else:
-            q_desired = robot_action
-            clip_ttg_multiplier = 1
+        q_desired = robot_action
 
         self.des_joint_state_hist.append(q_desired)
         self.joint_state_hist.append(self.robot.get_sensors()['joint_pos'].numpy())
@@ -154,7 +146,7 @@ class RealRobotEnv(gym.Env):
 
         self.robot.follow_trajectory(
             joint_positions=robot_action,
-            time_to_go=1 * clip_ttg_multiplier,
+            time_to_go=1,
             converge_pos_err=False,
             )
 
@@ -206,13 +198,7 @@ class RealRobotEnv(gym.Env):
         if self.use_delta_robot:
             robot_action = self.robot.get_sensors()['joint_pos'].numpy() + robot_action
             
-        if self.velocity_limits:
-            q_des_unclipped = robot_action
-            q_desired = self.robot.clip_velocity_limits(q_des_unclipped)
-            if not np.allclose(q_des_unclipped, q_desired):
-                print("WARNING: Clipping velocity limits, desired: %s, clipped: %s, abs diff: %s"%(q_des_unclipped, q_desired, np.abs(q_des_unclipped - q_desired)))
-        else:
-            q_desired = robot_action
+        q_desired = robot_action
 
         self.des_joint_state_hist.append(q_desired)
         self.joint_state_hist.append(self.robot.get_sensors()['joint_pos'].numpy())
@@ -244,7 +230,7 @@ class RealRobotEnv(gym.Env):
             self.hand.reset(width=robot_obs[7])
         else:
             rand_jitter = np.random.uniform(-self.starting_pos_noise, self.starting_pos_noise, size=np.shape(np.array(self.default_reset_qpos)))
-            print('rand_jitter', rand_jitter)
+            # print('rand_jitter', rand_jitter)
             reset_des_pos = (np.array(self.default_reset_qpos) + rand_jitter).tolist()
             self.robot.reset(reset_pos=reset_des_pos)
             self.hand.reset(width=self.default_reset_gripper)
@@ -259,8 +245,8 @@ class RealRobotEnv(gym.Env):
         top_rgb = self.top_cam.get_sensors()['rgb']
         second_rgb = self.second_cam.get_sensors()['rgb']
 
-        top_rgb = resize_and_crop(top_rgb, "top_center_new_lab", des_height=250, des_width=250)
-        second_rgb = resize_and_crop(second_rgb, "front_center_new_lab", des_height=250, des_width=250)
+        # top_rgb = resize_and_crop(top_rgb, "top_center_new_lab", des_height=250, des_width=250)
+        # second_rgb = resize_and_crop(second_rgb, "front_center_new_lab", des_height=250, des_width=250)
 
         obs = dict(
             joint_pos = joint_pos,
