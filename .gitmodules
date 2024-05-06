@@ -1,0 +1,3 @@
+[submodule "irl_polymetis"]
+	path = irl_polymetis
+	url = git@github.com:intuitive-robots/irl_polymetis.git
